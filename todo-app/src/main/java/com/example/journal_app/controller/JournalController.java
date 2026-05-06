@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,40 +28,45 @@ public class JournalController {
     private JournalService journalService;
 
     @GetMapping("")
-    public List<JournalEntry> getAll() {
-        return journalService.getAllJournalEntries();
+    public ResponseEntity<List<JournalEntry>> getAll() {
+        return new ResponseEntity<>(journalService.getAllJournalEntries(), HttpStatus.OK);
     }
 
     @PostMapping()
-    public JournalEntry saveJournalEntry(@RequestBody JournalEntry journalEntry) {
+    public ResponseEntity<JournalEntry> saveJournalEntry(@RequestBody JournalEntry journalEntry) {
         journalService.saveJournalEntry(journalEntry);
-        return journalEntry;
-
+        return new ResponseEntity<>(journalEntry, HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
-    public JournalEntry getJournalEntry(@PathVariable String id) {
-        return journalService.getJournalEntryById(id);
+    public ResponseEntity<JournalEntry> getJournalEntry(@PathVariable String id) {
+        JournalEntry journalEntry = journalService.getJournalEntryById(id);
+        if (journalEntry != null) {
+            return new ResponseEntity<>(journalEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("{id}")
-    public boolean deleteJournalEntry(@PathVariable String id) {
+    public ResponseEntity<?> deleteJournalEntry(@PathVariable String id) {
         journalService.deleteJournalEntryById(id);
-        return true;
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("{id}")
-    public JournalEntry updateJournalEntry(@PathVariable String id, @RequestBody JournalEntry newEntry) {
+    public ResponseEntity<JournalEntry> updateJournalEntry(@PathVariable String id,
+            @RequestBody JournalEntry newEntry) {
         JournalEntry oldEntry = journalService.getJournalEntryById(id);
         if (oldEntry != null) {
-            oldEntry.setTitle(newEntry.getTitle() != null && !newEntry.getTitle().equals("") ? newEntry.getTitle()
-                    : oldEntry.getTitle());
-            oldEntry.setContent(
-                    newEntry.getContent() != null && !newEntry.getContent().equals("") ? newEntry.getContent()
-                            : oldEntry.getContent());
+            if (newEntry.getTitle() != null && !newEntry.getTitle().equals("")) {
+                oldEntry.setTitle(newEntry.getTitle());
+            }
+            if (newEntry.getContent() != null && !newEntry.getContent().equals("")) {
+                oldEntry.setContent(newEntry.getContent());
+            }
             journalService.saveJournalEntry(oldEntry);
-            return oldEntry;
+            return ResponseEntity.ok(oldEntry);
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 }
