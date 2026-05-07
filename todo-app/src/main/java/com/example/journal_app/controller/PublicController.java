@@ -33,10 +33,14 @@ public class PublicController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
-    public ResponseEntity<UserEntry> signup(@RequestBody UserEntry userEntry) {
-        userEntry.setPassword(passwordEncoder.encode(userEntry.getPassword()));
-        userService.saveUser(userEntry);
-        return new ResponseEntity<>(userEntry, HttpStatus.CREATED);
+    public ResponseEntity<?> signup(@RequestBody UserEntry userEntry) {
+        try {
+            userEntry.setPassword(passwordEncoder.encode(userEntry.getPassword()));
+            userService.saveUser(userEntry);
+            return new ResponseEntity<>(userEntry, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/login")

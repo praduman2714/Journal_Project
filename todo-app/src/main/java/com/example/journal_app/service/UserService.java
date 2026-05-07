@@ -5,6 +5,7 @@ import com.example.journal_app.repository.UserEntryInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.bson.types.ObjectId;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class UserService {
         return userEntryInterface.findAll();
     }
 
-    public Optional<UserEntry> getUserById(Object id) {
+    public Optional<UserEntry> getUserById(ObjectId id) {
         return userEntryInterface.findById(id);
     }
 
@@ -30,7 +31,7 @@ public class UserService {
         return userEntryInterface.findByUserName(userName);
     }
 
-    public void deleteUserById(Object id) {
+    public void deleteUserById(ObjectId id) {
         userEntryInterface.deleteById(id);
     }
 }
